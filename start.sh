@@ -19,8 +19,26 @@ RUNNER_NAME=${RUNNER_NAME:-"${GITHUB_ORG}-$(hostname)"}
 #  ./config.sh remove --unattended --token ${RUNNER_TOKEN}
 #}
 
+# Managing starting/waiting for Docker to start
+start_docker(){
+	# Attempt to start Docker
+	sudo service docker start
+
+	# Check running or attempt again after 5 seconds
+	if $(sudo service docker status); then
+	  return
+	else
+	  echo "Attempting to start Docker again..."
+	  sleep 5
+	  sudo service docker start
+	fi
+
+	# Exit if still not started
+	sudo service docker status || exit
+}
+
 echo "Starting Docker..."
-sudo service docker start
+start_docker;
 
 echo "Request JIT config from GitHub..."
 api_response=$(curl -sX POST \
