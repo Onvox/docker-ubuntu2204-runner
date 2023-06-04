@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  runner:
+    build: .
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1 # number of runners
+      placement:
+        constraints:
+          - node.role == worker
+    environment:
+      GITHUB_ORG: "MyGitHubOrganization"  # GitHub Organization name
+      GITHUB_TOKEN: ghp_superSecretKey    # GitHub token with admin:org 
+
