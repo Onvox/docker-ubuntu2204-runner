@@ -2,7 +2,7 @@ version: '3'
 
 services:
   runner:
-    build: .
+    build: .  # build your own image after cloning this repo
     restart: unless-stopped
     deploy:
       mode: replicated
@@ -13,4 +13,3 @@ services:
     environment:
       GITHUB_ORG: "MyGitHubOrganization"  # GitHub Organization name
       GITHUB_TOKEN: ghp_superSecretKey    # GitHub token with admin:org 
-
