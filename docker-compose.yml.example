@@ -4,6 +4,7 @@ services:
   runner:
     build: .  # build your own image after cloning this repo
     restart: unless-stopped
+    runtime: sysbox-runc
     deploy:
       mode: replicated
       replicas: 1 # number of runners
