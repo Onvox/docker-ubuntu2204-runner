@@ -14,10 +14,13 @@ RUNNER_NAME=${RUNNER_NAME:-"${GITHUB_ORG}-$(hostname)"}
 # after a job dispatch/completion. If you stop the containers
 # manually it will leave a runner configured on your org :(
 # 
-#cleanup() {
-#  echo "Removing runner..."
-#  ./config.sh remove --unattended --token ${RUNNER_TOKEN}
-#}
+cleanup() {
+	#  echo "Removing runner..."
+	#  ./config.sh remove --unattended --token ${RUNNER_TOKEN}
+
+	# Clean up work folder
+	rm -rf ~/actions-runner/_work && mkdir ~/actions-runner/_work
+}
 
 # Managing starting/waiting for Docker to start
 start_docker(){
