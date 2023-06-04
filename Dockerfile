@@ -11,7 +11,18 @@ RUN groupadd -r docker && useradd -G docker,sudo -m github
 
 # install any dependent packages along with jq to parse API responses
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl git jq build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip sudo
+    build-essential \
+    curl \
+    git \
+    jq \
+    libffi-dev \
+    libssl-dev \
+    openssh-client \
+    python3 \
+    python3-dev \
+    python3-pip \
+    python3-venv \
+    sudo
 
 # install docker
 RUN curl -fsSL https://get.docker.com | bash
