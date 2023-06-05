@@ -15,10 +15,14 @@ RUNNER_NAME=${RUNNER_NAME:-"${GITHUB_ORG}-$(hostname)"}
 # manually it will leave a runner configured on your org :(
 # 
 cleanup() {
+	echo "Performing cleanup tasks..."
 	#  echo "Removing runner..."
 	#  ./config.sh remove --unattended --token ${RUNNER_TOKEN}
 
-	# Clean up work folder
+	# Clean up any lingering credentials
+	rm -rf ~/.ssh
+
+	# Clean up previous work
 	rm -rf ~/actions-runner/_work && mkdir ~/actions-runner/_work
 }
 
@@ -56,7 +60,10 @@ encoded_jit_config=$(echo ${api_response} | jq .encoded_jit_config --raw-output)
 
 cd /home/github/actions-runner
 
+trap 'cleanup; exit 0' 0
 trap 'cleanup; exit 130' INT
 trap 'cleanup; exit 143' TERM
+
+#echo "DEBUG: ${api_response}"
 
 ./run.sh --jitconfig ${encoded_jit_config} & wait $!
