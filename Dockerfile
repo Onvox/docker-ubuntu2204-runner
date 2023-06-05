@@ -34,6 +34,11 @@ RUN cd /home/github && mkdir actions-runner && cd actions-runner \
     && curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
     && tar xzf ./actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
 
+# symlink /opt/hostedtoolcache to ~github/actions-runner/_work/_tool
+# see https://github.com/actions/setup-python/issues/551
+RUN mkdir -p ~github/actions-runner/_work/_tool
+RUN ln -s ~github/actions-runner/_work/_tool /opt/hostedtoolcache
+
 # install github additional dependencies
 RUN chown -R github ~github && /home/github/actions-runner/bin/installdependencies.sh
 

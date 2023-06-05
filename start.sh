@@ -23,7 +23,7 @@ cleanup() {
 	rm -rf ~/.ssh
 
 	# Clean up previous work
-	rm -rf ~/actions-runner/_work && mkdir ~/actions-runner/_work
+	rm -rf ~/actions-runner/_work && mkdir -p ~/actions-runner/_work/_tool
 }
 
 # Managing starting/waiting for Docker to start
