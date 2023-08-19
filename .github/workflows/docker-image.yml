@@ -4,8 +4,7 @@ name: Docker image
 on:
   pull_request:
     branches: [ main ]
-  push:
-    branches: [ main ]
+    types: [ opened, synchronize, closed ]
 
 env:
   RUNNER_VERSION: 2.304.0
