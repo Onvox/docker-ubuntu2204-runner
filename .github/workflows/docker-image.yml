@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 
 env:
-  RUNNER_VERSION: 2.304.0
+  RUNNER_VERSION: 2.308.0
 
 jobs:
   build:
