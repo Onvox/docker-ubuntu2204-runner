@@ -2,6 +2,8 @@
 name: Docker image
 
 on:
+  pull_request:
+    branches: [ main ]
   push:
     branches: [ main ]
 
@@ -10,6 +12,7 @@ env:
 
 jobs:
   build:
+    if: github.event.pull_request.merged == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,8 +22,7 @@ jobs:
         run: docker build . --file Dockerfile --build-arg="RUNNER_VERSION=${{ env.RUNNER_VERSION }}"
 
   publish:
-    if: github.event_name == 'push'
-    needs: build
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
