@@ -7,7 +7,7 @@ on:
     types: [ opened, synchronize, closed ]
 
 env:
-  RUNNER_VERSION: 2.308.0
+  RUNNER_VERSION: 2.310.2
 
 jobs:
   build:
