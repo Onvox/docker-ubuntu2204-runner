@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 # github runner version
-ARG RUNNER_VERSION="2.310.2"
+ARG RUNNER_VERSION="2.311.0"
 
 # update the base packages
 RUN apt-get update -y && apt-get upgrade -y
