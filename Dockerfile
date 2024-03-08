@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 # github runner version
-ARG RUNNER_VERSION="2.314.1"
+ARG GH_RUNNER_VERSION="2.314.1"
 
 # update the base packages
 RUN apt-get update -y && apt-get upgrade -y
@@ -32,8 +32,8 @@ RUN echo "%sudo ALL = (root) NOPASSWD: /usr/sbin/service" >> /etc/sudoers
 
 # cd into the user directory, download and unzip the github actions runner
 RUN cd /home/github && mkdir actions-runner && cd actions-runner \
-    && curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
-    && tar xzf ./actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
+    && curl -O -L https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz \
+    && tar xzf ./actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz
 
 # symlink /opt/hostedtoolcache to ~github/actions-runner/_work/_tool
 # see https://github.com/actions/setup-python/issues/551

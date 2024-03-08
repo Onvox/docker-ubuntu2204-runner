@@ -1,0 +1,65 @@
+---
+name: Release check
+
+on:
+  schedule:
+    - cron: '* * * * 0'  # Check every Sunday
+
+
+jobs:
+  release_check:
+    name: Release check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get latest GitHub Runner release version
+        id: github
+        run: >-
+          echo "VERSION=$(
+          curl -L
+          -H "Accept: application/vnd.github+json"
+          -H "X-GitHub-Api-Version: 2022-11-28"
+          -s https://api.github.com/repos/actions/runner/releases
+          | jq '.[0].tag_name' | grep -Eo '[0-9\.]+'
+          )" >> $GITHUB_OUTPUT
+
+      - name: Fail if GitHub runner version missing 
+        if: ${{ !steps.github.outputs.VERSION }}
+        run: exit 1
+
+      - name: Get latest docker container version
+        id: onvox
+        run: >-
+          echo "VERSION=$(
+          curl -L
+          -H "Accept: application/vnd.github+json"
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
+          -H "X-GitHub-Api-Version: 2022-11-28"
+          -s https://api.github.com/orgs/Onvox/packages/container/docker-ubuntu2204-runner%2Fdocker-ubuntu2204-runner/versions
+          | jq '.[0].metadata.container.tags[0]' | grep -Eo '[0-9\.]+'
+          )"  >> $GITHUB_OUTPUT
+
+      - name: Fail if docker container version missing 
+        if: ${{ !steps.onvox.outputs.VERSION }}
+        run: exit 1
+
+      - name: Print version information
+        run: |
+          echo "Latest GitHub version: ${{ steps.github.outputs.VERSION }}"
+          echo "Latest container version: ${{ steps.onvox.outputs.VERSION }}"
+
+      - name: Set new version to build
+        if: ${{ steps.github.outputs.VERSION != steps.onvox.outputs.VERSION }}
+        id: version
+        run: |
+          echo "VERSION=${{ steps.github.outputs.VERSION }}" >> $GITHUB_OUTPUT
+
+    outputs:
+      VERSION: ${{ steps.version.outputs.VERSION }}
+
+  release:
+    name: Release
+    if: ${{ needs.release_check.outputs.VERSION }}
+    needs: release_check
+    uses: ./.github/workflows/docker-image.yml
+    with:
+      runner_version: ${{ needs.release_check.outputs.VERSION }}
