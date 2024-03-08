@@ -5,25 +5,84 @@ on:
   pull_request:
     branches: [ main ]
     types: [ opened, synchronize, closed ]
+  workflow_call:
+    inputs:
+      runner_version:
+        description: GitHub runner version to install
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      runner_version:
+        description: GitHub runner version to install
+        type: string
+        required: true
 
-env:
-  RUNNER_VERSION: 2.314.1
 
 jobs:
-  build:
-    if: github.event.pull_request.merged == false
+  set_version:
+    name: set version
     runs-on: ubuntu-latest
     steps:
+      - name: Set version to input supplied version
+        if: ${{ inputs.runner_version }}
+        run: |
+          echo "GH_RUNNER_VERSION=${{ inputs.runner_version }}" >> $GITHUB_ENV
+
+      - name: Set version to latest GitHub version
+        if: ${{ !inputs.runner_version }}
+        run: >-
+          echo "GH_RUNNER_VERSION=$(
+          curl -L
+          -H "Accept: application/vnd.github+json"
+          -H "X-GitHub-Api-Version: 2022-11-28"
+          -s https://api.github.com/repos/actions/runner/releases
+          | jq '.[0].tag_name' | grep -Eo '[0-9\.]+'
+          )" >> $GITHUB_ENV
+
+      - name: Print version selected
+        run: |
+          echo "using version: ${{ env.GH_RUNNER_VERSION }}"
+
+      - name: Set output
+        id: version
+        run: |
+          echo "GH_RUNNER_VERSION=${{ env.GH_RUNNER_VERSION }}" >> $GITHUB_OUTPUT
+
+    outputs:
+      GH_RUNNER_VERSION: ${{ steps.version.outputs.GH_RUNNER_VERSION }}
+      
+  build:
+    if: |
+      github.event.pull_request.merged == false && 
+      github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: set_version
+    steps:
+      - name: Set version
+        run: |
+          echo "GH_RUNNER_VERSION=${{ needs.set_version.outputs.GH_RUNNER_VERSION }}" >> $GITHUB_ENV
+
       - name: Checkout code
         uses: actions/checkout@v3
         
       - name: Build Docker image
-        run: docker build . --file Dockerfile --build-arg="RUNNER_VERSION=${{ env.RUNNER_VERSION }}"
+        run: >-
+          docker build . --file Dockerfile 
+          --build-arg="GH_RUNNER_VERSION=${{ env.GH_RUNNER_VERSION }}"
 
   publish:
-    if: github.event.pull_request.merged == true
+    if: |
+      github.event.pull_request.merged == true ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    needs: set_version
     steps:
+      - name: Set version
+        run: |
+          echo "GH_RUNNER_VERSION=${{ needs.set_version.outputs.GH_RUNNER_VERSION }}" >> $GITHUB_ENV
+
       - name: Checkout code
         uses: actions/checkout@v3
       
@@ -33,6 +92,6 @@ jobs:
           name: Onvox/docker-ubuntu2204-runner/docker-ubuntu2204-runner
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          buildargs: RUNNER_VERSION
+          buildargs: GH_RUNNER_VERSION
           registry: docker.pkg.github.com
-          tags: ${{ env.RUNNER_VERSION }}
+          tags: ${{ env.GH_RUNNER_VERSION }}
