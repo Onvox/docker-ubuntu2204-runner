@@ -100,11 +100,12 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}
+          tags: ${{ env.GH_RUNNER_VERSION }}
 
       - name: 'Build and Publish to GitHub Registry (tag: ${{ env.GH_RUNNER_VERSION }})'
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ env.GH_RUNNER_VERSION }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
