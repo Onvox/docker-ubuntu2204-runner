@@ -85,13 +85,24 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: 'Publish to GitHub Registry (tag: RUNNER_VERSION)'
-        uses: elgohr/Publish-Docker-Github-Action@master
+
+      - name: Login into GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          name: Onvox/docker-ubuntu2204-runner/docker-ubuntu2204-runner
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          buildargs: GH_RUNNER_VERSION
-          registry: docker.pkg.github.com
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+
+      - name: 'Build and Publish to GitHub Registry (tag: ${{ env.GH_RUNNER_VERSION }})'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
           tags: ${{ env.GH_RUNNER_VERSION }}
+          labels: ${{ steps.meta.outputs.labels }}
