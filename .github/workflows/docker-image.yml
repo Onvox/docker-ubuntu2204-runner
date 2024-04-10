@@ -107,7 +107,6 @@ jobs:
         with:
           context: .
           push: true
-          build-args:
-            - GH_RUNNER_VERSION=${{ env.GH_RUNNER_VERSION }}
+          build-args: GH_RUNNER_VERSION=${{ env.GH_RUNNER_VERSION }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
