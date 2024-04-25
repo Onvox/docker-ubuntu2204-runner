@@ -28,26 +28,33 @@ cleanup() {
 
 # Managing starting/waiting for Docker to start
 start_docker(){
-	# Attempt to start Docker
-	sudo service docker start
+	tries=0
 
-	# Check running or attempt again after 5 seconds
-	if $(sudo service docker status); then
-	  return
-	else
-	  echo "Attempting to start Docker again..."
-	  sleep 5
-	  sudo service docker start
-	fi
+	# Attempt to start Docker
+	while ! docker ps >/dev/null && [[ "$tries" -lt 5 ]]; do
+		let "tries++"
+
+		echo "Starting Docker... (attempt $tries of 5)"
+		sudo dockerd &
+
+		if ! docker ps >/dev/null; then
+		   echo "Docker not available yet, waiting 5 seconds."
+		   sleep 5 # wait for docker to start
+		fi
+	done
 
 	# Exit if still not started
-	sudo service docker status || exit
+	if ! docker ps >/dev/null; then
+	  echo "Docker did not start, exiting."
+	  exit
+	fi
+
+	echo "Docker is running!"
 }
 
-echo "Starting Docker..."
 start_docker;
 
-echo "Request JIT config from GitHub..."
+echo "Requesting JIT config from GitHub..."
 api_response=$(curl -sX POST \
 	-H "Accept: application/vnd.github+json" \
   	-H "Authorization: Bearer ${GITHUB_TOKEN}"\

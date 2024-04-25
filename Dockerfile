@@ -28,6 +28,7 @@ RUN curl -fsSL https://get.docker.com | bash
 
 # configure sudo
 RUN echo "%sudo ALL = (root) NOPASSWD: /usr/bin/docker" >> /etc/sudoers
+RUN echo "%sudo ALL = (root) NOPASSWD: /usr/bin/dockerd" >> /etc/sudoers
 RUN echo "%sudo ALL = (root) NOPASSWD: /usr/sbin/service" >> /etc/sudoers
 
 # cd into the user directory, download and unzip the github actions runner
