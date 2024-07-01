@@ -103,7 +103,7 @@ jobs:
           tags: ${{ env.GH_RUNNER_VERSION }}
 
       - name: 'Build and Publish to GitHub Registry (tag: ${{ env.GH_RUNNER_VERSION }})'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
